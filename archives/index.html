@@ -20,6 +20,18 @@
   <link rel="stylesheet" href="/css/style.css" type="text/css">
   <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
   
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-17094094-4']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
 </head>
 <body>
   <div id="container">
@@ -59,9 +71,9 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-soft-into-to-backbone" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-intro-to-backbone" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2014/04/04/soft-into-to-backbone/" class="article-date">
+    <a href="/2014/04/04/intro-to-backbone/" class="article-date">
   <time datetime="2014-04-04T11:55:25.000Z" itemprop="datePublished">4 Apr 2014</time>
 </a>
     
@@ -73,7 +85,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2014/04/04/soft-into-to-backbone/">Intro To Backbone.js</a>
+      <a class="article-title" href="/2014/04/04/intro-to-backbone/">Intro To Backbone.js</a>
     </h1>
   
 
@@ -81,14 +93,12 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>Before you begin This blog post was written over a year ago. Since then I’ve learn many important lessons. Some of the content may be outdated and subpar. </p>
+        <p>Before you begin I should mention this blog post was written over a year ago. Since then I’ve learnt many important lessons. Some of the content may be outdated. </p>
 <p>In the last couple of years the world of Client Side MV* (Model View whatever…) has really grown and matured. Addy Osmani’s <a href="http://todomvc.com/" target="_blank">TodoMVC</a> does a great job of highlighting the differences between the ever growing list of frontend frameworks out there.</p>
 <p>I began working with Backbone in 2012 when single page applications were becoming mainstream. I was given the task of rebuiling a tool making sure it’s fast, responsive and maintainable.<br>After some careful consideration, I decided to use Backbone because of its simplicity and flexiblity. The whole code base, including the comments, is 1496 lines. That’s why it’s often called a library rather than a framework.</p>
-<ul>
-<li>A line here about the motivation for this (for you &amp; the reader). (example: If you’ve gotten started with Backbone, or any MV* framework, you’ve probably had to adapt and consider things you haven’t touched before in frontend development.<br>In this post I’m going to cover some of the more common challenges you might encounter during development, and how I went about tackling them.</li>
-</ul>
+<p>If you’ve gotten started with Backbone, or any MV* framework, you’ve probably had to adapt and consider things you haven’t touched before in frontend development.<br>In this post I’m going to cover some of the more common challenges you might encounter during development, and how I went about tackling them.</p>
 <h2 id="Naming_Convention">Naming Convention</h2>
-<p>As per the <a href="http://ricostacruz.com/backbone-patterns/" target="_blank">backbone patterns</a> we use camelCase for instances and Capitalize the constructors. That’s how we have the application namespaced too; the whole app is namespaced under the <code>app</code> namespace</p>
+<p>As per the <a href="http://ricostacruz.com/backbone-patterns/" target="_blank">backbone patterns</a> I use camelCase for instances and Capitalize the constructors. That’s how I have the application namespaced too; the whole app is namespaced under the <code>app</code> namespace</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre>1
 2
 3
@@ -118,7 +128,7 @@
 <p>The disadvantage with this is namespace pollution. Creating an object in the global object is considered bad practice. There are solutions for this, like using <a href="http://requirejs.org/" target="_blank">require.js</a> however that’s beyond the scope of this post.</p>
 <h2 id="Subviews">Subviews</h2>
 <p>How to handle subviews was one of the most important questions as our app grew in complexity.</p>
-<p>One of the main concerns we had here was memory management (which we’ll talk more about later). [Backbone Fundementals] (<a href="http://addyosmani.github.com/backbone-fundamentals/#nesting-what-is-the-best-approach-for-rendering-and-appending-sub-views-in-backbone.js" target="_blank">http://addyosmani.github.com/backbone-fundamentals/#nesting-what-is-the-best-approach-for-rendering-and-appending-sub-views-in-backbone.js</a>) covers this pretty nicely. If you initialise all the subviews in the parent view’s ‘initialize’ function and then render the subviews in an ‘onRender’ function, which is called when our ‘render’ event is triggered:</p>
+<p>One of the main concerns I had here was memory management (which I’ll talk more about later). [Backbone Fundementals] (<a href="http://addyosmani.github.com/backbone-fundamentals/#nesting-what-is-the-best-approach-for-rendering-and-appending-sub-views-in-backbone.js" target="_blank">http://addyosmani.github.com/backbone-fundamentals/#nesting-what-is-the-best-approach-for-rendering-and-appending-sub-views-in-backbone.js</a>) covers this pretty nicely. If you initialise all the subviews in the parent view’s ‘initialize’ function and then render the subviews in an ‘onRender’ function, which is called when our ‘render’ event is triggered:</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre>1
 2
 3
@@ -175,7 +185,7 @@
 <h2 id="Memory_management">Memory management</h2>
 <p>It’s really easy to lose track of objects and create Zombie views in a single page application, which can lead to some hard to find memory leaks.</p>
 <p>Derick Baily, a noteable Backbone developer and creator of the Marionette framework, covers this issue in his article <a href="http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/" target="_blank">Zombies! RUN!</a>.</p>
-<p>This has been widely discussed in the Backbone community. There are a few different approaches out there,  what we went for in the end was to create a universal dispose function.</p>
+<p>This has been widely discussed in the Backbone community. There are a few different approaches out there,  what I went for in the end was to create a universal dispose function.</p>
 <p>This ‘dispose’ function is called by the router whenever the main view is changed.</p>
 <p>This is done using Backbone events in the router. Every route triggers an event passing the main view of the route; if it’s different to the currentView, as saved by the router, the dispose function is called on the main view.</p>
 <p>Here is an example, heavily inspired by <a href="https://github.com/chaplinjs/chaplin/blob/master/src/chaplin/views/view.coffee#L458" target="_blank">Chaplin</a></p>
@@ -234,10 +244,10 @@
 <blockquote>
 <p>The unbind() function will un-register from the model’s change events and the view’s jQuery change delegate.</p>
 </blockquote>
-<p>Recently NYTimes also released their own model-view binding solution for Backbone. Although we haven’t tried it yet, <a href="http://nytimes.github.com/backbone.stickit/" target="_blank">Backbone.stickit</a> seems to be in active development and may be a good alternative.</p>
+<p>Recently NYTimes also released their own model-view binding solution for Backbone. Although I haven’t tried it yet, <a href="http://nytimes.github.com/backbone.stickit/" target="_blank">Backbone.stickit</a> seems to be in active development and may be a good alternative.</p>
 <h2 id="Complex_models">Complex models</h2>
-<p>When working with a REST API sometimes the reponse includes a nested object that contains some extra metadata, Backbone assigns this as a property by default, but unfortunetly no events are triggered when the sub-object changes. To solve this issue we create a submodel on parse.</p>
-<p>For example, let’s say we were fetching comments for a photo in a photosharing website and this was the json response:</p>
+<p>When working with a REST API sometimes the reponse includes a nested object that contains some extra metadata, Backbone assigns this as a property by default, but unfortunetly no events are triggered when the sub-object changes. To solve this issue I create a submodel upon initialization and just update it on parse.</p>
+<p>For example, let’s say we were fetching a comment for a photo in a photosharing website and this was the json response:</p>
 <figure class="highlight json"><table><tr><td class="gutter"><pre>1
 2
 3
@@ -254,7 +264,7 @@
  "<span class="attribute">id</span>": <span class="value"><span class="number">13685794</span></span>,
  "<span class="attribute">created_at</span>": <span class="value"><span class="string">"2011/04/06 14:55:30 +0000"</span></span>,
  "<span class="attribute">user_id</span>": <span class="value"><span class="number">1505645</span></span>,
- "<span class="attribute">body</span>": <span class="value"><span class="string">"great shot! :D"</span></span>,
+ "<span class="attribute">body</span>": <span class="value"><span class="string">"great shot!"</span></span>,
  "<span class="attribute">user</span>": <span class="value">{
    "<span class="attribute">id</span>": <span class="value"><span class="number">1505645</span></span>,
    "<span class="attribute">username</span>": <span class="value"><span class="string">"joeyl"</span></span>,
@@ -264,7 +274,7 @@
 </span>}
 </pre></td></tr></table></figure>
 
-<p>This is how we set the <code>user</code> submodel after a fetch:</p>
+<p>This is how we could set the <code>user</code> submodel after a fetch:</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre>1
 2
 3
@@ -284,7 +294,7 @@
  urlRoot : <span class="string">'/api/comments/'</span>,
 
  initialize : <span class="function"><span class="keyword">function</span><span class="params">(options)</span> {</span>
-   <span class="keyword">this</span>.set({ user : <span class="keyword">new</span> UserModel() }, { silent : <span class="literal">true</span> });
+   <span class="keyword">this</span>.set({ user : <span class="keyword">new</span> UserModel() });
  }
 
  parse : <span class="function"><span class="keyword">function</span><span class="params">(response)</span> {</span>
@@ -369,9 +379,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://2color.github.io/2014/04/04/soft-into-to-backbone/" data-id="xl7nrq3dfz89nxqa" class="article-share-link">Share</a>
+      <a data-url="http://2color.github.io/2014/04/04/intro-to-backbone/" data-id="lwrxl0av5tyd90o0" class="article-share-link">Share</a>
       
       
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CommonJS/">CommonJS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/backbone.js/">backbone.js</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jquery/">jquery</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/require.js/">require.js</a></li></ul>
+
     </footer>
   </div>
   
@@ -383,10 +395,6 @@
 </section>
         
           <aside id="sidebar">
-  
-    
-  
-    
   
     
   
@@ -406,10 +414,19 @@
       <ul>
         
           <li>
-            <a href="/2014/04/04/soft-into-to-backbone/">Intro To Backbone.js</a>
+            <a href="/2014/04/04/intro-to-backbone/">Intro To Backbone.js</a>
           </li>
         
       </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CommonJS/">CommonJS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/backbone.js/">backbone.js</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jquery/">jquery</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/require.js/">require.js</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </div>
 
