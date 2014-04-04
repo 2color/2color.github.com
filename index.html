@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>2color tech blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="og:type" content="blog">
+<meta name="og:title">
+<meta name="og:url" content="http://2color.github.io/">
+<meta name="og:image">
+<meta name="og:site_name" content="2color tech blog">
+<meta name="og:description">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternative" href="/atom.xml" title="2color tech blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="http://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">2color tech blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><input type="submit" value="&#xF002;" class="search-form-submit"><input type="hidden" name="q" value="site:http://2color.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-soft-into-to-backbone" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/04/04/soft-into-to-backbone/" class="article-date">
+  <time datetime="2014-04-04T11:55:25.000Z" itemprop="datePublished">4 Apr 2014</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/04/04/soft-into-to-backbone/">Soft Into To Backbone.js</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>In the last year the world of Client Side MV* has really grown and matured. Addy Osmani’s <a href="http://todomvc.com/" target="_blank">TodoMVC</a> does a great job of highlighting the differences between a variety of the more common frameworks out there.</p>
+<p>After some careful consideration, we went for Backbone because of its simplicity and small file size. The whole code base, including the comments, is 1496 lines. That’s why it’s often called a library rather than a framework.</p>
+<ul>
+<li>A line here about the motivation for this (for you &amp; the reader). (example: If you’ve gotten started with Backbone, or any MV<em> framework, you’ll probably have had to adapt and consider things you’ve not touched before in frontend development. OR SOMETHING</em><br>In this post we’re going to cover some of the more common challenges you might encounter during development, and how we went about tackling them.</li>
+</ul>
+<h2 id="Naming_Convention">Naming Convention</h2>
+<p>As per the <a href="http://ricostacruz.com/backbone-patterns/" target="_blank">backbone patterns</a> we use camelCase for instances and Capitalize the constructors. That’s how we have the application namespaced too; the whole app is namespaced under the <code>app</code> namespace</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="code"><pre>window.app = {
+ <span class="comment">// the constructors (aka classes)</span>
+ Views : {},
+ Models : {},
+ Collections : {},
+
+ views : {},
+ models : {},
+ collections : {},
+
+ utils : {}
+}
+</pre></td></tr></table></figure>
+
+<h2 id="Subviews">Subviews</h2>
+<p>How to handle subviews was one of the most important questions as our app grew in complexity.</p>
+<p>One of the main concerns we had here was memory management (which we’ll talk more about later). [Backbone Fundementals] (<a href="http://addyosmani.github.com/backbone-fundamentals/#nesting-what-is-the-best-approach-for-rendering-and-appending-sub-views-in-backbone.js" target="_blank">http://addyosmani.github.com/backbone-fundamentals/#nesting-what-is-the-best-approach-for-rendering-and-appending-sub-views-in-backbone.js</a>) covers this pretty nicely. If you initialise all the subviews in the parent view’s ‘initialize’ function and then render the subviews in an ‘onRender’ function, which is called when our ‘render’ event is triggered:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+</pre></td><td class="code"><pre>
+<span class="keyword">var</span> OuterView = Backbone.View.extend({
+   initialize: <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+       <span class="keyword">this</span>.on(<span class="string">'render'</span>, <span class="keyword">this</span>.onRender);
+       <span class="keyword">this</span>.subViews = {};
+       <span class="keyword">this</span>.subViews.innerView = <span class="keyword">new</span> InnerView();
+   },
+
+   render: <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+       <span class="keyword">this</span>.$el.html(template);
+       <span class="keyword">this</span>.trigger(<span class="string">'render'</span>);
+       <span class="keyword">return</span> <span class="keyword">this</span>;
+   }
+
+   onRender: <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+     <span class="keyword">this</span>.$el.append( <span class="keyword">this</span>.subViews.innerView.render().el);
+   }
+});
+
+<span class="keyword">var</span> InnerView = Backbone.View.extend({
+   render: <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+       <span class="keyword">this</span>.$el.html(template);
+       <span class="keyword">return</span> <span class="keyword">this</span>;
+   }
+});
+</pre></td></tr></table></figure>
+
+<p>The great thing about this is that it leaves us with references to all the subviews which we can later clean up.</p>
+<h2 id="Memory_management">Memory management</h2>
+<p>It’s really easy to lose track of objects and create Zombie views in a single page application, which can lead to some hard to find memory leaks.</p>
+<p>Derick Baily, a noteable Backbone developer and creator of the Marionette framework, covers this issue in his article <a href="http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/" target="_blank">Zombies! RUN!</a>.</p>
+<p>This has been widely discussed in the Backbone community. There are a few different approaches out there,  what we went for in the end was to create a universal dispose function.</p>
+<p>This ‘dispose’ function is called by the router whenever the main view is changed.</p>
+<p>This is done using Backbone events in the router. Every route triggers an event passing the main view of the route; if it’s different to the currentView, as saved by the router, the dispose function is called on the main view.</p>
+<p>Here is an example, heavily inspired by <a href="https://github.com/chaplinjs/chaplin/blob/master/src/chaplin/views/view.coffee#L333" target="_blank">Chaplin</a></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+</pre></td><td class="code"><pre>Backbone.View.prototype.dispose = <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+   <span class="keyword">this</span>.undelegateEvents();
+
+   <span class="keyword">if</span>( _.isObject(<span class="keyword">this</span>.modelBinder)) {
+       <span class="keyword">this</span>.modelBinder.unbind();
+   }
+
+   <span class="keyword">if</span>(_.isObject(<span class="keyword">this</span>.subPresenters)) {
+       _.each(<span class="keyword">this</span>.subPresenters, <span class="function"><span class="keyword">function</span><span class="params">(presenter, i)</span> {</span>
+           presenter.destroy();
+           <span class="keyword">delete</span> <span class="keyword">this</span>.subPresenters[i];
+       }, <span class="keyword">this</span> );
+   }
+
+   <span class="keyword">this</span>.$el.remove();
+   <span class="keyword">this</span>.stopListening();
+   <span class="keyword">this</span>.off();
+
+   <span class="keyword">if</span>( _.isObject( <span class="keyword">this</span>.model ) )  {
+       <span class="keyword">delete</span> <span class="keyword">this</span>.model;
+   }
+
+   <span class="keyword">if</span>( _.isObject( <span class="keyword">this</span>.collection ) )    {
+       <span class="keyword">delete</span> <span class="keyword">this</span>.collection;
+   }
+}
+</pre></td></tr></table></figure>
+
+<p>It’s worth noting that this function is added to the Backbone View prototype. If you find your self adding more functions to the Backbone.View.prototype, it’s probably time to create a base view from which all your views extend.</p>
+<p>A bonus tip: <code>listenTo</code> and <code>stopListening</code> are two new useful features added in Backbone 0.9.9. They provide an easy interface to remove bindings to other objects. This is great when you have a lot of bindings to other objects ( e.g. Models, Collections, Subviews, Mediator ). The way this <a href="https://github.com/documentcloud/backbone/blob/master/backbone.js#L194" target="_blank">works</a> is by keeping track of all the events the object is listening to in other objects.</p>
+<p>Also worth mentioning that the <a href="https://github.com/theironcook/Backbone.ModelBinder" target="_blank">modelBinder plugin</a> can be used for two-way model-view binding. This is extremly useful if you are dealing with many forms and provides a declarative way to define these bindings.</p>
+<p>The unbind function, direct from the documentation:</p>
+<blockquote>
+<p>The unbind() function will un-register from the model’s change events and the view’s jQuery change delegate.</p>
+</blockquote>
+<p>Recently NYTimes also released their own model-view binding solution for Backbone. Although we haven’t tried it yet, <a href="http://nytimes.github.com/backbone.stickit/" target="_blank">Backbone.stickit</a> seems to be in active development and may be a good alternative.</p>
+<h2 id="Complex_models">Complex models</h2>
+<p>When working with a REST API sometimes the reponse includes a nested object that contains some extra metadata, Backbone assigns this as a property by default, but unfortunetly no events are triggered when the sub-object changes. To solve this issue we create a submodel on parse.</p>
+<p>For example, let’s say we were fetching comments for a photo in a photosharing website and this was the json response:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="code"><pre>{
+ "<span class="attribute">id</span>": <span class="value"><span class="number">13685794</span></span>,
+ "<span class="attribute">created_at</span>": <span class="value"><span class="string">"2011/04/06 14:55:30 +0000"</span></span>,
+ "<span class="attribute">user_id</span>": <span class="value"><span class="number">1505645</span></span>,
+ "<span class="attribute">body</span>": <span class="value"><span class="string">"great shot! :D"</span></span>,
+ "<span class="attribute">user</span>": <span class="value">{
+   "<span class="attribute">id</span>": <span class="value"><span class="number">1505645</span></span>,
+   "<span class="attribute">username</span>": <span class="value"><span class="string">"joeyl"</span></span>,
+   "<span class="attribute">name</span>": <span class="value"><span class="string">"Joey Lawrance"</span></span>,
+   "<span class="attribute">avatar_url</span>": <span class="value"><span class="string">"http://somefilehosting.com/avatars-000003153897.jpg?"</span>
+ </span>}
+</span>}
+</pre></td></tr></table></figure>
+
+<p>This is how we set the <code>user</code> submodel after a fetch:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre></td><td class="code"><pre>Comment = Backbone.Model.extend({
+ urlRoot : <span class="string">'/api/comments/'</span>,
+
+ initialize : <span class="function"><span class="keyword">function</span><span class="params">(options)</span> {</span>
+   <span class="keyword">this</span>.set({ user : <span class="keyword">new</span> UserModel() }, { silent : <span class="literal">true</span> });
+ }
+
+ parse : <span class="function"><span class="keyword">function</span><span class="params">(response)</span> {</span>
+   <span class="keyword">this</span>.get(<span class="string">'user'</span>).set(response.user);
+   response.user = <span class="keyword">this</span>.get(<span class="string">'user'</span>);
+
+   <span class="keyword">return</span> response;
+ }
+
+});
+</pre></td></tr></table></figure>
+
+<h2 id="Promises">Promises</h2>
+<p>As a kid I used to ask my parents for ice cream when there was no ice cream shop around. My parents would usually promise me, that as soon as we saw a shop, I would get an ice cream. Until we found an ice cream shop, I would be left with that promise; as soon as I got the ice cream the promise would be ‘resolved’ and I would say “thank you”. If we didn’t end up finding an icecream shop I would usually fail gracefully by demanding cake. If we were to write a program that would react this way, promises could be of help.</p>
+<p>When you think about asynchronous programming, you make requests (typically AJAX), and react acordingly. <a href="http://en.wikipedia.org/wiki/Futures_and_promises" target="_blank">Promises</a> is an interface helping the developer manage asynchronous callbacks and manage possible cases/outcomes. It has been included in jQuery since version 1.5. jQuery’s implementation is called Deferreds objects and is based on the <a href="http://wiki.commonjs.org/wiki/Promises/A" target="_blank">CommonJS design</a>.</p>
+<p>If you have been writing code that looks like this:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="code"><pre>myModel.fetch({
+ success: <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+   myOtherModel.fetch({
+     success : <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+       myView.render();
+     }
+   });
+ }
+});
+</pre></td></tr></table></figure>
+
+<p>You will probably benefit from using jQuery’s Deferred Object.</p>
+<p>So assuming we wanted to fetch a model and while it’s fetching, show an animated loader gif. In both cases of success and failiure we would want to hide the animated gif. So without promises it would look like this:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="code"><pre>myModel.fetch({
+ success: <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+   $(<span class="string">'#ajax-loader'</span>).hide();
+   drawTable();
+ }
+ error: <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+   $(<span class="string">'#ajax-loader'</span>).hide();
+   showError();
+ }
+});
+</pre></td></tr></table></figure>
+
+<p>Not very DRY, so how about this:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+</pre></td><td class="code"><pre>myModel.fetch()
+ .done(drawTable)
+ .fail(showError)
+ .always(<span class="function"><span class="keyword">function</span><span class="params">()</span> {</span> $(<span class="string">'#ajax-loader'</span>).hide(); });
+</pre></td></tr></table></figure>
+
+<p>Calling <a href="http://backbonejs.org/#Model-fetch" target="_blank">fetch</a> on a model in Backbone returns a jqXHR object.From the jQuery documantation:</p>
+<blockquote>
+<p>The jqXHR objects returned by $.ajax() as of jQuery 1.5 implement the Promise interface, giving them all the properties, methods, and behavior of a Promise.</p>
+</blockquote>
+<p>Since jQuery has both <code>promises</code> and <code>deferred</code> objects, you might ask your self what is the difference.</p>
+<p>This can be explained using an example: If you are implementing your own deferred object for a function that loads a notification waits a minute and then hides it. The function would create a defered object which could later resolve or reject depending on how it went. The part of your code which called that function will want to define the callbacks for the different cases so it needs access to the <code>done</code>,<code>fail</code>,<code>always</code>. However this part of your code cannot decide if the operation was successful or not. There for it doesn’t have access to the <code>resolve</code> or <code>reject</code> functions.</p>
+<p>For more on promises in jQuery, we recommend <a href="http://www.bitstorm.org/weblog/2012-1/Deferred_and_promise_in_jQuery.html" target="_blank">this article</a>.</p>
+<p>Thanks to the great Backbone community the project has really matured over the last year, with a rapidly growing community and 11,887 stars on Github. Answers are easily found on <a href="http://stackoverflow.com/questions/tagged/backbone.js" target="_blank">stackoverflow</a>.</p>
+<p>It seems like it’s almost becoming the defacto choice for single page applications, in no small part, thanks to it’s simplicity and flexibility.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://2color.github.io/2014/04/04/soft-into-to-backbone/" data-id="o8j7jxkdjjhlvnyj" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/04/04/hello-world/" class="article-date">
+  <time datetime="2014-04-04T11:43:25.000Z" itemprop="datePublished">4 Apr 2014</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/04/04/hello-world/">Hello World</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Welcome to <a href="http://zespia.tw/hexo" target="_blank">Hexo</a>! This is your very first post. Check <a href="http://zespia.tw/hexo/docs" target="_blank">documentation</a> to learn how to use.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://2color.github.io/2014/04/04/hello-world/" data-id="x8orcgap4k6ev9vn" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+  
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  
+    
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/04">April 2014</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2014/04/04/soft-into-to-backbone/">Soft Into To Backbone.js</a>
+          </li>
+        
+          <li>
+            <a href="/2014/04/04/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2014 Daniel Norman<br>
+      Powered by <a href="http://zespia.tw/hexo/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script type="text/javascript" src="/js/script.js"></script>
+  </div>
+</body>
+</html>
